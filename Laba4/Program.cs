@@ -1,10 +1,13 @@
-﻿namespace Laba4
+﻿using System.Reflection.PortableExecutable;
+
+namespace Laba4
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            var reader = new Reader();
+            var nodes = reader.ReadAllTasks("Data");
         }
     }
 }
