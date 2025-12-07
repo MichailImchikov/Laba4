@@ -2,9 +2,9 @@ using System.Globalization;
 
 class Reader
 {
-    public List<Node> ReadAllTasks(string dataFolderPath)
+    public List<(string FileName, Node Node)> ReadAllTasks(string dataFolderPath)
     {
-        var nodes = new List<Node>();
+        var nodes = new List<(string FileName, Node Node)>();
         
         if (!Directory.Exists(dataFolderPath))
         {
@@ -19,7 +19,8 @@ class Reader
             var node = ReadTask(file);
             if (node != null)
             {
-                nodes.Add(node);
+                var fileName = Path.GetFileNameWithoutExtension(file);
+                nodes.Add((fileName, node));
             }
         }
 
