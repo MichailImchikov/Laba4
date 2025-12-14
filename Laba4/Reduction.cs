@@ -1,4 +1,4 @@
-﻿class Reduction
+﻿class Reduction : IReduction
 {
     private const int MaxComponentsPerCluster = 16;
 

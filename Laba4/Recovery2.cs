@@ -1,4 +1,4 @@
-class Recovery2
+class Recovery2 : IRecovery
 {
     public List<City> Recover(List<Node> nodes)
     {
@@ -159,20 +159,19 @@ class Recovery2
         var route = new List<Component>();
         var remaining = cities.ToList();
 
-        // Начинаем с первого города
-        var current = remaining[0];
-        route.Add(current);
-        remaining.Remove(current);
+
+        route.Add(remaining.First());
+        remaining.Remove(remaining.First());
 
         // Жадно выбираем ближайший город
         while (remaining.Count > 0)
         {
             City nearest = remaining[0];
-            double minDistance = current.DistanceTo(nearest);
+            double minDistance = route.Last().DistanceTo(nearest);
 
             foreach (var city in remaining)
             {
-                double distance = current.DistanceTo(city);
+                double distance = route.Last().DistanceTo(city);
                 if (distance < minDistance)
                 {
                     minDistance = distance;
@@ -182,7 +181,6 @@ class Recovery2
 
             route.Add(nearest);
             remaining.Remove(nearest);
-            current = nearest;
         }
 
         return route;

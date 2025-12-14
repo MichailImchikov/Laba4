@@ -94,7 +94,6 @@ class Visualizer
         endMarker.Shape = MarkerShape.OpenTriangleUp;
 
         plot.SavePng(fileName, 1200, 800);
-        Console.WriteLine($"График сохранён: {fileName}");
     }
 
     private List<Node> GetAllLeafClusters(List<Node> nodes)
