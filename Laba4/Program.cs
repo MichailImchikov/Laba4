@@ -6,7 +6,7 @@
         {
             var reader = new Reader();
             var tasks = reader.ReadAllTasks("Data");
-
+            double[] solution = { 6656, 564, 1019, 2513, 79114, 206171 };
             var reduction = new Reduction();
             var recovery = new Recovery();
             var recovery2 = new Recovery2();
@@ -45,7 +45,7 @@
                     sum2 += recoveredNode2[j].DistanceTo(recoveredNode2[j + 1]);
                 }
                 sum2 += recoveredNode2[0].DistanceTo(recoveredNode2[recoveredNode2.Count - 1]);
-
+                Console.WriteLine($"Solution: {solution[i]}");
                 Console.WriteLine($"Recovery1: длина пути = {sum1:F2}, время = {sw1.ElapsedMilliseconds} ms");
                 Console.WriteLine($"Recovery2: длина пути = {sum2:F2}, время = {sw2.ElapsedMilliseconds} ms");
                 
