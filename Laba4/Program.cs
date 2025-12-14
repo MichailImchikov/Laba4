@@ -36,6 +36,7 @@
                 sum1 += recoveredNode1[0].DistanceTo(recoveredNode1[recoveredNode1.Count - 1]);
 
                 var sw2 = System.Diagnostics.Stopwatch.StartNew();
+                clusters = reduction.Clusterize(node);
                 var recoveredNode2 = recovery2.Recover(clusters);
                 sw2.Stop();
                 double sum2 = 0;
