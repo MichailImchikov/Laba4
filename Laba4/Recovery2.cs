@@ -1,3 +1,5 @@
+using System.Xml;
+
 class Recovery2 : IRecovery
 {
     public List<City> Recover(List<Node> nodes)
@@ -39,39 +41,37 @@ class Recovery2 : IRecovery
         var route = new List<Node>();
         var remaining = nodes.ToList();
 
-        // Стартовая нода: та, у которой расстояния до остальных как можно ближе друг к другу (минимальная дисперсия расстояний)
         Node current = remaining
-            .OrderBy(n =>
-            {
-                var dists = remaining.Where(o => !ReferenceEquals(o, n)).Select(o => n.DistanceTo(o)).ToList();
-                if (dists.Count == 0) return 0; // если одна нода
-                double mean = dists.Average();
-                double variance = dists.Select(d => (d - mean) * (d - mean)).Average();
-                return variance;
-            })
-            .First();
+                    .OrderBy(n =>
+                    {
+                        var dists = remaining.Where(o => !ReferenceEquals(o, n)).Select(o => n.DistanceTo(o)).ToList();
+                        if (dists.Count == 0) return 0; // если одна нода
+                        double mean = dists.Average();
+                        double variance = dists.Select(d => (d - mean) * (d - mean)).Average();
+                        return variance;
+                    })
+                    .First();
         route.Add(current);
         remaining.Remove(current);
 
-        // Жадно выбираем ближайшую ноду
-        while (remaining.Count > 0)
-        {
-            Node nearest = remaining[0];
-            double minDistance = current.DistanceTo(nearest);
-
-            foreach (var node in remaining)
+            while (remaining.Count > 0)
             {
-                double distance = current.DistanceTo(node);
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    nearest = node;
-                }
-            }
+                Node nearest = remaining[0];
+                double minDistance = current.DistanceTo(nearest);
 
-            route.Add(nearest);
-            remaining.Remove(nearest);
-            current = nearest;
+                foreach (var node in remaining)
+                {
+                    double distance = current.DistanceTo(node);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        nearest = node;
+                    }
+                }
+
+                route.Add(nearest);
+                remaining.Remove(nearest);
+                current = nearest;
         }
 
         return route;
@@ -85,22 +85,16 @@ class Recovery2 : IRecovery
         List<Node> orderedNodes = GreedNodes(nodes);
         var result = new List<Component>();
 
-        // Добавляем все города из первого кластера
         var firstCluster = orderedNodes[0];
         result.AddRange(firstCluster.Components);
 
-        // Соединяем остальные кластера
         for (int i = 1; i < orderedNodes.Count; i++)
         {
-            var prevCluster = orderedNodes[i - 1];
-            var currentCluster = orderedNodes[i];
 
-            // Последний город из предыдущего кластера
             var lastCity = result.Last() as City;
             if (lastCity == null) continue;
 
-            // Находим ближайший город в текущем кластере к последнему городу
-            var currentCities = currentCluster.GetAllCity().ToList();
+            var currentCities = orderedNodes[i].GetAllCity().ToList();
             if (currentCities.Count == 0) continue;
 
             City nearestCity = currentCities[0];
@@ -118,34 +112,51 @@ class Recovery2 : IRecovery
                 }
             }
 
-            // Выбираем направление обхода внутри кластера, чтобы соединение было выгоднее
-            // Сравниваем расстояния до соседних городов вокруг ближайшего
-            int nextIndex = (nearestIndex + 1) % currentCities.Count;
-            int prevIndex = (nearestIndex - 1 + currentCities.Count) % currentCities.Count;
-
-            double toNext = nearestCity.DistanceTo(currentCities[nextIndex]);
-            double toPrev = nearestCity.DistanceTo(currentCities[prevIndex]);
-
-            bool goForward = toNext <= toPrev; // если следующий ближе или равен, идём вперёд, иначе назад
-
-            if (goForward)
+            if(i == orderedNodes.Count -1 )
             {
-                // Добавляем города начиная с ближайшего и двигаясь вперёд с циклическим обходом
-                for (int j = 0; j < currentCities.Count; j++)
+                for (int j = nearestIndex; j < currentCities.Count; j++)
                 {
-                    int idx = (nearestIndex + j) % currentCities.Count;
-                    result.Add(currentCities[idx]);
+                    result.Add(currentCities[j]);
+                }
+
+                for (int j = 0; j < nearestIndex; j++)
+                {
+                    result.Add(currentCities[j]);
                 }
             }
             else
             {
-                // Добавляем города начиная сnearestCity и двигаясь назад с циклическим обходом
-                for (int j = 0; j < currentCities.Count; j++)
+                var nextCluster = orderedNodes[i +1];
+
+                int nextIndex = (nearestIndex + 1) % currentCities.Count;
+                int prevIndex = (nearestIndex - 1 + currentCities.Count) % currentCities.Count;
+
+                double toNext = nextCluster.GetAllCity().Select(x=> x.DistanceTo(currentCities[nextIndex])).Min() ;
+                toNext += currentCities[nearestIndex].DistanceTo(currentCities[(nearestIndex - 1 + currentCities.Count) % currentCities.Count]);
+                double toPrev = nextCluster.GetAllCity().Select(x => x.DistanceTo(currentCities[prevIndex])).Min();
+                toPrev += currentCities[nearestIndex].DistanceTo(currentCities[(nearestIndex + 1) % currentCities.Count]);
+
+                bool goForward = toNext <= toPrev;
+
+                if (goForward)
                 {
-                    int idx = (nearestIndex - j + currentCities.Count) % currentCities.Count;
-                    result.Add(currentCities[idx]);
+                    for (int j = 0; j < currentCities.Count; j++)
+                    {
+                        int idx = (nearestIndex - j + currentCities.Count) % currentCities.Count;
+                        
+                        result.Add(currentCities[idx]);
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < currentCities.Count; j++)
+                    {
+                        int idx = (nearestIndex + j) % currentCities.Count;
+                        result.Add(currentCities[idx]);
+                    }
                 }
             }
+
         }
 
         return result;
@@ -162,8 +173,6 @@ class Recovery2 : IRecovery
 
         route.Add(remaining.First());
         remaining.Remove(remaining.First());
-
-        // Жадно выбираем ближайший город
         while (remaining.Count > 0)
         {
             City nearest = remaining[0];

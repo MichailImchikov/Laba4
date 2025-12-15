@@ -39,12 +39,10 @@
         var route = new List<Node>();
         var remaining = nodes.ToList();
 
-        // Начинаем с первой ноды
         var current = remaining[0];
         route.Add(current);
         remaining.Remove(current);
 
-        // Жадно выбираем ближайшую ноду
         while (remaining.Count > 0)
         {
             Node nearest = remaining[0];
@@ -76,22 +74,16 @@
         List<Node> orderedNodes = GreedNodes(nodes);
         var result = new List<Component>();
 
-        // Добавляем все города из первого кластера
         var firstCluster = orderedNodes[0];
         result.AddRange(firstCluster.Components);
 
-        // Соединяем остальные кластера
         for (int i = 1; i < orderedNodes.Count; i++)
         {
-            var prevCluster = orderedNodes[i - 1];
-            var currentCluster = orderedNodes[i];
 
-            // Последний город из предыдущего кластера
             var lastCity = result.Last() as City;
             if (lastCity == null) continue;
 
-            // Находим ближайший город в текущем кластере к последнему городу
-            var currentCities = currentCluster.GetAllCity().ToList();
+            var currentCities = orderedNodes[i].GetAllCity().ToList();
             if (currentCities.Count == 0) continue;
 
             City nearestCity = currentCities[0];
@@ -109,12 +101,11 @@
                 }
             }
 
-            // Добавляем города начиная с ближайшего и до конца
             for (int j = nearestIndex; j < currentCities.Count; j++)
             {
                 result.Add(currentCities[j]);
             }
-            // Затем добавляем города с начала до ближайшего
+
             for (int j = 0; j < nearestIndex; j++)
             {
                 result.Add(currentCities[j]);

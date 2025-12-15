@@ -35,17 +35,14 @@
         private static void RunScenario(Node node, string fileName, IReduction reduction, IRecovery recovery, Visualizer visualizer, string label)
         {
             var clusters = reduction.Clusterize(node);
-            var sw = System.Diagnostics.Stopwatch.StartNew();
             var route = recovery.Recover(clusters);
-            sw.Stop();
-
             double length = 0;
             for (int j = 0; j < route.Count - 1; j++)
                 length += route[j].DistanceTo(route[j + 1]);
             if (route.Count > 1)
                 length += route[0].DistanceTo(route[^1]);
 
-            Console.WriteLine($"{label}: длина пути = {length:F2}, время = {sw.ElapsedMilliseconds} ms");
+            Console.WriteLine($"{label}: длина пути = {length:F2}");
 
             var plotFileName = Path.Combine("Output", $"{fileName}_{label.Replace('+', '_').ToLower()}.png");
             visualizer.SaveRoutePlot(route, clusters, plotFileName, $"{label}: {fileName} (длина: {length:F2})");

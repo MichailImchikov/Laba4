@@ -11,10 +11,8 @@
     {
         var components = inputNode.Components.ToList();
 
-        // Находим наиболее отдалённые точки
         var seedComponents = FindMostDistantComponents(components, clusterCount);
         
-        // Создаём новые Node и добавляем в каждый по одной seed-точке
         var clusters = new List<Node>();
         foreach (var seed in seedComponents)
         {
@@ -23,10 +21,8 @@
             clusters.Add(node);
         }
 
-        // Оставшиеся компоненты
         var remaining = components.Except(seedComponents).ToList();
 
-        // Распределяем оставшиеся компоненты по ближайшим кластерам
         foreach (var component in remaining)
         {
             var nearestCluster = clusters
@@ -41,10 +37,8 @@
         {
             if (cluster.Components.Count > MaxComponentsPerCluster)
             {
-                // Рекурсивно кластеризуем
                 var subClusters = ClusterizeRecursive(cluster, clusterCount);
                 
-                // Создаём Node с подкластерами внутри
                 var parentNode = new Node();
                 foreach (var subCluster in subClusters)
                 {
@@ -66,21 +60,18 @@
         var result = new List<Component>();
         var available = components.ToList();
 
-        // Берём первую точку (можно взять любую, например с максимальной суммой расстояний)
         var first = available
             .OrderByDescending(c => available.Sum(other => c.DistanceTo(other)))
             .First();
-        
+
         result.Add(first);
         available.Remove(first);
 
-        // Находим остальные точки, максимально отдалённые от уже выбранных
         while (result.Count < count && available.Count > 0)
         {
             var farthest = available
                 .OrderByDescending(c => result.Min(selected => c.DistanceTo(selected)))
                 .First();
-            
             result.Add(farthest);
             available.Remove(farthest);
         }
